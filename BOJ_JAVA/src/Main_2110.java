@@ -15,65 +15,51 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-class Distance {
-    int small;
-    int big;
-
-    public Distance(int small, int big){
-        this.small = small;
-        this.big = big;
-    }
-}
 public class Main_2110 {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st;
 
         st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        int C = Integer.parseInt(st.nextToken());
+        int N = Integer.parseInt(st.nextToken());       // 집 개수
+        int C = Integer.parseInt(st.nextToken());       // 설치 가능한 공유기 개수
 
         int[] houses = new int[N];
-        boolean[] installed = new boolean[N];
         for (int n = 0; n < N; n++)
             houses[n] = Integer.parseInt(br.readLine());
         Arrays.sort(houses);
 
-        int cnt = C;
+        int left = 0;           // 첫번째 집 ~ 첫번째 집 간격
+        int right = houses[houses.length-1] - houses[0];    // 마지막 집 ~ 첫번째 집 간격
 
-        installed[0] = true;
-        installed[N-1] = true;
-        cnt -= 2;
+        /* mid 조정 조건
+        - mid에 따라 설치한 공유기의 개수 < C => 거리 좁혀야함 => right = mid-1
+        - mid에 따라 설치한 공유기의 개수 >= C => 거리 넓혀야함 => left = mid+1
+         */
 
-        Queue<Distance> waitingInstall = new LinkedList<>();
-        waitingInstall.add(new Distance(0, N-1));
+        int result = 0;
+        while(left <= right){
 
-        while (cnt > 0){
-            Distance currDist = waitingInstall.poll();
-            int mid = currDist.small + (currDist.big - currDist.small) / 2;
-            if ((currDist.big - currDist.small) % 2 == 1)
-                mid = (houses[mid] - houses[currDist.small]) > (houses[currDist.big] - houses[mid+1]) ? mid += 1 : mid;
+            int mid = (right+left) / 2;     // mid 값을 조정하면서 모든 거리 탐색
 
-            installed[mid] = true;
-            waitingInstall.add(new Distance(currDist.small, mid));
-            waitingInstall.add(new Distance(mid, currDist.big));
+            int cnt = 1;    // 제일 처음에 위치한 집은 설치
+            int latestHouse = houses[0];
 
-            cnt--;
-        }
+            for (int h = 1; h < houses.length; h++){
+                if (houses[h] - latestHouse >= mid){
+                    cnt++;
+                    latestHouse = houses[h];
+                }
+            }
 
-        int minDist = 0;
-        int prevIdx = 0;
-        for (int i = 0; i < installed.length; i++){
-            if (installed[i] == true){
-                int tmpDist = houses[i] - houses[prevIdx];
-                if (minDist == 0)
-                    minDist = tmpDist;
-                else
-                    minDist = minDist > tmpDist ? tmpDist : minDist;
-                prevIdx = i;
+            if (cnt < C){   // 적게 설치함 -> 간격 좁혀야함 -> right 줄이기
+                right = mid-1;
+            }else{          // cnt >= C -> 간격 넓혀야함 -> left 늘리기
+                result = mid;   // 현재 mid 값 임시저장
+                left = mid+1;
             }
         }
 
-        System.out.println(minDist);
+        System.out.println(result);
     }
 }
