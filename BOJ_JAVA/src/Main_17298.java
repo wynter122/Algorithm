@@ -1,38 +1,47 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Stack;
 import java.util.StringTokenizer;
+
+class Pair{
+    int num;
+    int index;
+
+    public Pair(int num, int index){
+        this.num = num;
+        this.index = index;
+    }
+}
 
 public class Main_17298 {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
         StringTokenizer st;
 
         int N = Integer.parseInt(br.readLine());
-        int[] arr = new int[N];
+        int[] result = new int[N];
+        Stack<Pair> stack = new Stack<>();               // 입력된 수 중 오큰수를 발견하지 못한 수 저장할 stack
 
         st = new StringTokenizer(br.readLine());
-        for (int n = 0; n < N; n++)
-            arr[n] = Integer.parseInt(st.nextToken());
 
-        Stack<Integer> stack = new Stack<>();
-        for (int n = 0; n < N; n++)
-            stack.push(arr[n]);
-
-        int[] result = new int[N];
-
-        for (int n = 0; n < N; n++){
-            int target = arr[n];
-
-
-            if (stack.empty())
-                result[n] = -1;
-            else
-                result[n] = stack.pop();
+        int idx = 0;
+        stack.push(new Pair(Integer.parseInt(st.nextToken()), idx++));      // 처음 수 stack 에 삽입
+        while(st.hasMoreTokens()){
+            int n = Integer.parseInt(st.nextToken());
+            while(!stack.empty()){
+                if(stack.peek().num < n)        // stack 의 top 이 n 보다 작으면
+                    result[stack.pop().index] = n;    // pop 한 후 해당 수의 오큰수를 n 으로 저장
+                else
+                    break;
+            }
+            stack.push(new Pair(n, idx++));
         }
 
-        for (int r : result)
-            System.out.print(r + " ");
+        for (int r : result) {
+            r = r == 0 ? -1 : r;
+            bw.write(r + " ");
+        }
+        bw.flush();
+        bw.close();
     }
 }
