@@ -1,22 +1,21 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Array;
 import java.util.*;
 
 class Edge {
-    int s, e, t;
-    public Edge(int s, int e, int t){
-        this.s = s;
+    int e, t;
+    public Edge(int e, int t){
         this.e = e;
         this.t = t;
     }
 }
 
-public class Main_1865 {
-    static int[][] graph;
-    static ArrayList<Edge> edges = new ArrayList<>();
-    static int[] time;
-    static final int INT_MAX = 1000000000;
+public class Main {
+    static ArrayList<ArrayList<Edge>> graph = new ArrayList<>();
+    static long[] time;
+    static final long INF = Integer.MAX_VALUE;
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st;
@@ -28,12 +27,11 @@ public class Main_1865 {
             int M = Integer.parseInt(st.nextToken());
             int W = Integer.parseInt(st.nextToken());
 
-            time = new int[N+1];
-            graph = new int[N+1][N+1];
-            for (int n = 0; n <= N; n++) {
-                time[n] = INT_MAX;
-                Arrays.fill(graph[n], INT_MAX);
-            }
+            // 배열 초기화
+            time = new long[N+1];
+            Arrays.fill(time, INF);
+            for (int n = 0; n <= N; n++)
+                graph.add(new ArrayList<>());
 
             // 도로 정보 받기
             for (int m = 0; m < M; m++){
@@ -42,10 +40,8 @@ public class Main_1865 {
                 int e = Integer.parseInt(st.nextToken());
                 int c = Integer.parseInt(st.nextToken());
 
-                if (graph[s][e] > c){
-                    graph[s][e] = c;
-                    graph[e][s] = c;
-                }
+                graph.get(s).add(new Edge(e, c));
+                graph.get(e).add(new Edge(s, c));
             }
 
             // 웜홀 정보 받기
@@ -55,19 +51,11 @@ public class Main_1865 {
                 int e = Integer.parseInt(st.nextToken());
                 int c = -Integer.parseInt(st.nextToken());
 
-                if(graph[s][e] > c)
-                    graph[s][e] = c;
-            }
-
-            for (int i = 1; i <= N; i++){
-                for (int j = 1; j <= N; j++){
-                    if (i != j)
-                        edges.add(new Edge(i, j, graph[i][j]));
-                }
+                graph.get(s).add(new Edge(e, c));
             }
 
             // 음수 사이클 체크
-            boolean result = BellmanFord(N);
+            boolean result = BellmanFord(1, N);
 
             if (result)
                 System.out.println("YES");
@@ -75,26 +63,22 @@ public class Main_1865 {
                 System.out.println("NO");
 
             // 배열 초기화
-            edges = new ArrayList<>();
+            graph = new ArrayList<>();
             time = null;
         }
     }
 
-    static boolean BellmanFord(int N) {
-        // 출발 노드 정하기
-        time[1] = 0;
+    static boolean BellmanFord(int start, int N) {
+        time[start] = 0;            // 출발 노드 정하기
 
-        // (정점 개수 -1)+ 1만큼 반복
-        for (int v = 1; v <= N; v++){
-            // 모든 간선 정보 확인
-            for (Edge edge : edges){
-                int start = edge.s;
-                int end = edge.e;
-                int addTime = edge.t;
-                if (time[start] != INT_MAX && time[end] > time[start] + addTime){
-                    time[end] = time[start] + addTime;
-                    if (v == N-1)             // 정점 개수 -1 반복에 새로운 갱신이 되면 -> 음수 사이클 존재
-                        return true;
+        for (int i = 1; i <= N; i++){               // 간선 개수만큼 반복
+            for (int v = 1; v <= N; v++){               // 매 반복마다 모든 정점으로부터 갱신될 수 있는지 확인
+                for (Edge next : graph.get(v)){
+                    if (time[v] + next.t < time[next.e]){               // https://www.acmicpc.net/board/view/72995 참고
+                        time[next.e] = time[v] + next.t;
+                        if (i == N)
+                            return true;
+                    }
                 }
             }
         }
