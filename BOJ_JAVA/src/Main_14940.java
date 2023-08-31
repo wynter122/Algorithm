@@ -4,15 +4,19 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
-class Node{
-        int i; int j;
-    public Node(int i, int j) {
-        this.i = i;
-        this.j = j;
+
+class Node {
+    int x, y;
+
+    public Node (int x, int y){
+        this.x = x;
+        this.y = y;
     }
 }
 
 public class Main_14940 {
+    static int[][] map;
+    static boolean[][] visited;
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st;
@@ -21,68 +25,56 @@ public class Main_14940 {
         int N = Integer.parseInt(st.nextToken());
         int M = Integer.parseInt(st.nextToken());
 
-        Node target = new Node(0, 0);
-        int[][] map = new int[N][M];
+        map = new int[N][M];
+        visited = new boolean[N][M];
+        Node target = null;
         for (int n = 0; n < N; n++){
             st = new StringTokenizer(br.readLine());
             for (int m = 0; m < M; m++){
                 map[n][m] = Integer.parseInt(st.nextToken());
-                if (map[n][m] == 2) {
+                if (map[n][m] == 2)
                     target = new Node(n, m);
-                }
             }
         }
 
-        // 결과 저장할 배열
-        int[][] result = new int[N][M];
-        boolean[][] visited = new boolean[N][M];        // 방문처리 할 배열
+        BFS(target);
+
+        StringBuilder sb = new StringBuilder();
+        for (int n = 0; n < N; n++){
+            for (int m = 0; m < M; m++){
+                if (map[n][m] != 0 && !visited[n][m])
+                    sb.append(-1).append(" ");
+                else
+                    sb.append(map[n][m]).append(" ");
+            }
+            sb.append("\n");
+        }
+
+        System.out.println(sb);
+    }
+    static void BFS(Node target){
+        int[] dx = {-1, 0, 1, 0};
+        int[] dy = {0, 1, 0, -1};
 
         Queue<Node> queue = new LinkedList<>();
         queue.add(target);
+        map[target.x][target.y] = 0;
+        visited[target.x][target.y] = true;
 
-        int cnt = 0;
-        int thisTimeCnt = queue.size();          // 이번 queue 사이즈
+        while(!queue.isEmpty()){
+            Node curr = queue.poll();
+            for (int d = 0; d < 4; d++){
+                int nx = curr.x + dx[d];
+                int ny = curr.y + dy[d];
 
-        while(!queue.isEmpty()){        // queue 가 빌 때까지
-            Node node = queue.poll();
-            if (visited[node.i][node.j]){   // 이미 방문했으면 queue 에서 삭제
-                thisTimeCnt--;
-                if (thisTimeCnt == 0){
-                    cnt++;          // 한번 방문 다 했으면 cnt++
-                    thisTimeCnt = queue.size();
-                }
-                continue;
-            }
-
-            visited[node.i][node.j] = true; // 방문처리
-            result[node.i][node.j] = cnt;   // 거리 기록
-
-            int[] iList = {-1, 0, 1, 0};
-            int[] jList = {0, 1, 0, -1};
-            for (int k = 0; k < 4; k++){
-                int ni = node.i + iList[k];
-                int nj = node.j + jList[k];
-                if ((ni >= 0 && ni < N) && (nj >= 0 && nj < M)){        // 범위체크
-                    if (map[ni][nj] == 1 && !visited[ni][nj]) {     // 1 이고 방문하지 않았으면
-                        queue.add(new Node(ni, nj));
+                if ((nx >= 0 && nx < map.length) && (ny >= 0 && ny < map[nx].length)){
+                    if (map[nx][ny] == 1 && !visited[nx][ny]){
+                        map[nx][ny] = map[curr.x][curr.y] + 1;
+                        queue.add(new Node(nx, ny));
+                        visited[nx][ny] = true;
                     }
                 }
             }
-            thisTimeCnt--;      // 이번에 방문해야하는 queue 원소 개수 감소
-            if (thisTimeCnt == 0){
-                cnt++;          // 한번 방문 다 했으면 cnt++
-                thisTimeCnt = queue.size();
-            }
-        }
-
-        for (int i = 0; i < N; i++){
-            for (int j = 0; j < M; j++){
-                int ans = result[i][j];
-                if (ans == 0 && map[i][j] != 2 && map[i][j] != 0)
-                    ans = -1;
-                System.out.print(ans + " ");
-            }
-            System.out.println();
         }
     }
 }
