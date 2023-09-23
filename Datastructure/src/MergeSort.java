@@ -2,33 +2,38 @@ import java.io.BufferedReader;
 import java.util.Arrays;
 
 public class MergeSort {
-    public static int[] sort(int[] list){
-        if (list.length == 1)
-            return list;
+    public static void sort(int[] list, int left, int right){
+        if (left == right)
+            return;
 
-        int n = list.length / 2;
-        int[] left = sort(Arrays.copyOfRange(list, 0, n));
-        int[] right = sort(Arrays.copyOfRange(list, n, list.length));
+        int mid = left + ((right-left) / 2);
+        sort(list, left, mid);
+        sort(list, mid+1, right);
+        merge(list, left, right, mid+1);
+    }
 
-        int[] sortedResult = new int[list.length];
-        int leftIdx = 0;
-        int rightIdx = 0;
-        int resultIdx = 0;
+    static void merge(int[] list, int left, int right, int mid){
+        int[] tmp = new int[list.length];
+        int tmpIdx = left;
+
+        int leftIdx = left;
+        int rightIdx = mid;
         while(true){
-            if (leftIdx < left.length && rightIdx < right.length){
-                if (left[leftIdx] < right[rightIdx])
-                    sortedResult[resultIdx++] = left[leftIdx++];
+            if (leftIdx <= mid && rightIdx <= right){
+                if (list[leftIdx] < list[rightIdx])
+                    tmp[tmpIdx++] = list[leftIdx++];
                 else
-                    sortedResult[resultIdx++] = right[rightIdx++];
-            }else if (leftIdx >= left.length && rightIdx < right.length)
-                sortedResult[resultIdx++] = right[rightIdx++];
-            else if (leftIdx < left.length && rightIdx >= right.length)
-                sortedResult[resultIdx++] = left[leftIdx++];
+                    tmp[tmpIdx++] = list[rightIdx++];
+            }else if (leftIdx > mid)
+                tmp[tmpIdx++] = list[rightIdx++];
+            else if (rightIdx > right)
+                tmp[tmpIdx++] = list[leftIdx++];
 
-            if (resultIdx >= sortedResult.length)
+            if (tmpIdx > right)
                 break;
         }
 
-        return sortedResult;
+        for (int i = left; i <= right; i++)
+            list[i] = tmp[i];
     }
 }
