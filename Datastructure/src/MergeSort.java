@@ -19,12 +19,12 @@ public class MergeSort {
         int leftIdx = left;
         int rightIdx = mid;
         while(true){
-            if (leftIdx <= mid && rightIdx <= right){
+            if (leftIdx < mid && rightIdx <= right){
                 if (list[leftIdx] < list[rightIdx])
                     tmp[tmpIdx++] = list[leftIdx++];
                 else
                     tmp[tmpIdx++] = list[rightIdx++];
-            }else if (leftIdx > mid)
+            }else if (leftIdx >= mid)
                 tmp[tmpIdx++] = list[rightIdx++];
             else if (rightIdx > right)
                 tmp[tmpIdx++] = list[leftIdx++];
